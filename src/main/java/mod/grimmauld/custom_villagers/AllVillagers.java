@@ -20,10 +20,11 @@ public class AllVillagers {
     private static final ArrayList<PointOfInterestType> pointOfInterestTypes = new ArrayList<>();
     private static final ArrayList<VillagerProfession> villagerProfessions = new ArrayList<>();
 
-    public static void addVillager(Block professionBlock, ResourceLocation id, @Nullable SoundEvent soundEvent) {
+    public static void addVillager(Block professionBlock, ResourceLocation id, @Nullable SoundEvent workSound) {
         PointOfInterestType pointOfInterestType = new PointOfInterestType(id.toString(), PointOfInterestType.getAllStates(professionBlock), 1, 1).setRegistryName(id);
+        PointOfInterestType.func_221052_a(pointOfInterestType);
         pointOfInterestTypes.add(pointOfInterestType);
-        villagerProfessions.add(new VillagerProfession(id.toString(), pointOfInterestType, ImmutableSet.of(), ImmutableSet.of(), soundEvent).setRegistryName(id));
+        villagerProfessions.add(new VillagerProfession(id.toString(), pointOfInterestType, ImmutableSet.of(), ImmutableSet.of(), workSound).setRegistryName(id));
     }
 
     @SubscribeEvent
