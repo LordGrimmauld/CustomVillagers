@@ -1,18 +1,15 @@
 package mod.grimmauld.custom_villagers;
 
 import com.google.gson.JsonObject;
-import mod.grimmauld.custom_villagers.util.FileHelper;
-import mod.grimmauld.custom_villagers.util.LazyPointOfInterestType;
-import mod.grimmauld.custom_villagers.util.LazyVillagerProfession;
-import mod.grimmauld.custom_villagers.util.TextureHelper;
+import mod.grimmauld.custom_villagers.util.*;
 import net.minecraft.entity.merchant.villager.VillagerProfession;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
 import net.minecraft.village.PointOfInterestType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -26,10 +23,10 @@ public class AllVillagers {
     private static final ArrayList<LazyVillagerProfession> villagerProfessions = new ArrayList<>();
 
 
-    public static void addVillager(@Nullable ResourceLocation professionBlock, ResourceLocation id, @Nullable SoundEvent workSound) {
+    public static void addVillager(@Nullable ResourceLocation professionBlock, ResourceLocation id, @Nullable ResourceLocation workSoundId) {
         LazyPointOfInterestType pointOfInterestType = new LazyPointOfInterestType(id, professionBlock);
         pointOfInterestTypes.add(pointOfInterestType);
-        villagerProfessions.add(new LazyVillagerProfession(id, pointOfInterestType, workSound));
+        villagerProfessions.add(new LazyVillagerProfession(id, pointOfInterestType, workSoundId));
     }
 
     @SubscribeEvent
@@ -49,8 +46,8 @@ public class AllVillagers {
             JsonObject json = FileHelper.openAsJson(file);
             if (json == null)
                 return;
-
-            addVillager(new ResourceLocation(JSONUtils.getString(json, "profession_block")), new ResourceLocation(JSONUtils.getString(json, "id")), null);
+            final ResourceLocation workSoundId = json.has("work_sound") ? new ResourceLocation(JSONUtils.getString(json, "work_sound")) : null;
+            addVillager(new ResourceLocation(JSONUtils.getString(json, "profession_block")), new ResourceLocation(JSONUtils.getString(json, "id")), workSoundId);
         });
     }
 
@@ -59,5 +56,12 @@ public class AllVillagers {
     @SuppressWarnings("unused")
     public static void reloadEvent(ModelRegistryEvent event) {
         TextureHelper.loadProfessionTextures();
+    }
+
+    @SubscribeEvent
+    @SuppressWarnings("unused")
+    @OnlyIn(Dist.CLIENT)
+    public static void loadSoundsEvent(SoundLoadEvent event) {
+        SoundHelper.loadWorkSounds();;
     }
 }

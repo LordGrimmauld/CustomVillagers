@@ -13,8 +13,9 @@ import java.util.List;
 
 public class FileHelper {
     private static final File ROOT = new File("/");
-    public static final File VILLAGER_ROOT = new File("villagers");
+    private static final File VILLAGER_ROOT = new File("villagers");
     public static final File VILLAGER_DIR = new File("villagers/villagers");
+    public static final File VILLAGER_SOUNDS = new File("villagers/sounds");
     public static final File VILLAGER_TEXTURES = new File("villagers/textures");
     public static final File VILLAGER_LANG = new File("villagers/lang");
 
@@ -65,5 +66,7 @@ public class FileHelper {
             VILLAGER_LANG.mkdir();
         if(!VILLAGER_TEXTURES.exists())
             VILLAGER_TEXTURES.mkdir();
+        if(!VILLAGER_SOUNDS.exists())
+            VILLAGER_SOUNDS.mkdir();
     }
 }

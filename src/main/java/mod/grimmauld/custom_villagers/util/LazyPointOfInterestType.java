@@ -21,7 +21,7 @@ public class LazyPointOfInterestType {
     @Nonnull
     public PointOfInterestType getOrCreate() {
         if (pointOfInterestType == null) {
-            Block professionBlock = ForgeRegistries.BLOCKS.getValue(blockId);
+            Block professionBlock = blockId != null && ForgeRegistries.BLOCKS.containsKey(blockId) ? ForgeRegistries.BLOCKS.getValue(blockId) : null;
             pointOfInterestType = new PointOfInterestType(id.toString(), professionBlock == null ? ImmutableSet.of() : PointOfInterestType.getAllStates(professionBlock), 1, 1).setRegistryName(id);
             PointOfInterestType.func_221052_a(pointOfInterestType);
         }
