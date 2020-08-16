@@ -1,9 +1,9 @@
 package mod.grimmauld.custom_villagers;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.minecraft.block.Block;
+import mod.grimmauld.custom_villagers.util.FileHelper;
+import mod.grimmauld.custom_villagers.util.LazyPointOfInterestType;
+import mod.grimmauld.custom_villagers.util.LazyVillagerProfession;
 import net.minecraft.entity.merchant.villager.VillagerProfession;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -12,79 +12,44 @@ import net.minecraft.village.PointOfInterestType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.List;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, modid = CustomVillagers.MODID)
 public class AllVillagers {
-    private static final ArrayList<PointOfInterestType> pointOfInterestTypes = new ArrayList<>();
-    private static final ArrayList<VillagerProfession> villagerProfessions = new ArrayList<>();
+    private static final ArrayList<LazyPointOfInterestType> pointOfInterestTypes = new ArrayList<>();
+    private static final ArrayList<LazyVillagerProfession> villagerProfessions = new ArrayList<>();
 
-    public static void addVillager(@Nullable Block professionBlock, ResourceLocation id, @Nullable SoundEvent workSound) {
-        PointOfInterestType pointOfInterestType = new PointOfInterestType(id.toString(), professionBlock == null ? ImmutableSet.of() : PointOfInterestType.getAllStates(professionBlock), 1, 1).setRegistryName(id);
-        PointOfInterestType.func_221052_a(pointOfInterestType);
+
+    public static void addVillager(@Nullable ResourceLocation professionBlock, ResourceLocation id, @Nullable SoundEvent workSound) {
+        LazyPointOfInterestType pointOfInterestType = new LazyPointOfInterestType(id, professionBlock);
         pointOfInterestTypes.add(pointOfInterestType);
-        villagerProfessions.add(new VillagerProfession(id.toString(), pointOfInterestType, ImmutableSet.of(), ImmutableSet.of(), workSound).setRegistryName(id));
+        villagerProfessions.add(new LazyVillagerProfession(id, pointOfInterestType, workSound));
+    }
+
+    @SubscribeEvent
+    @SuppressWarnings("unused")
+    public static void onVillagerPOIRegistry(final RegistryEvent.Register<PointOfInterestType> pointOfInterestTypeRegistryEvent) {
+        pointOfInterestTypes.forEach(lazyPointOfInterestType -> pointOfInterestTypeRegistryEvent.getRegistry().register(lazyPointOfInterestType.getOrCreate()));
     }
 
     @SubscribeEvent
     @SuppressWarnings("unused")
     public static void onVillagerProffesionsRegistry(final RegistryEvent.Register<VillagerProfession> villagerProfessionRegistryEvent) {
-        villagerProfessions.forEach(villagerProfessionRegistryEvent.getRegistry()::register);
-    }
-
-    @SubscribeEvent
-    @SuppressWarnings("unused")
-    public static void onVillagerPOIRegistry(final RegistryEvent.Register<PointOfInterestType> pointOfInterestTypeRegister) {
-        pointOfInterestTypes.forEach(pointOfInterestTypeRegister.getRegistry()::register);
+        villagerProfessions.forEach(lazyVillagerProfession -> villagerProfessionRegistryEvent.getRegistry().register(lazyVillagerProfession.getOrCreate()));
     }
 
     static void load() {
-        List<File> fileList = getVillagerFiles();
-        JsonParser parser = new JsonParser();
-        fileList.forEach(file -> {
-            CustomVillagers.LOGGER.info(String.format("Loading villager from file %s", file.toString()));
-            JsonObject json;
-            try {
-                json = parser.parse(new FileReader(file)).getAsJsonObject();
-            } catch (FileNotFoundException e) {
-                CustomVillagers.LOGGER.error(String.format("Could not open file %s: %s", file.toString(), e.toString()));
+        FileHelper.findAllFiles(FileHelper.VILLAGER_DIR, ".json").forEach(file -> {
+            JsonObject json = FileHelper.openAsJson(file);
+            if (json == null)
                 return;
-            }
 
-            final Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(JSONUtils.getString(json, "profession_block")));
+            final ResourceLocation blockId = new ResourceLocation(JSONUtils.getString(json, "profession_block"));
             final ResourceLocation id = new ResourceLocation(JSONUtils.getString(json, "id"));
 
-            addVillager(block, id, null);
+            addVillager(blockId, id, null);
         });
-    }
-
-    private static List<File> getVillagerFiles() {
-        List<File> fileList = new ArrayList<>();
-        findVillagerFiles(CustomVillagers.VILLAGER_DIR, fileList);
-        return fileList;
-    }
-
-    private static void findVillagerFiles(File path, List<File> files) {
-        if (path.isDirectory()) {
-            File[] next = path.listFiles();
-            if (next == null)
-                return;
-            for (File file : next) {
-                if (file.isDirectory()) {
-                    findVillagerFiles(file, files);
-                } else {
-                    if (file.getName().toLowerCase().endsWith(".json")) {
-                        files.add(file);
-                    }
-                }
-            }
-        }
     }
 }
