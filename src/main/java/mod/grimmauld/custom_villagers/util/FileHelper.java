@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileHelper {
-    public static final File ROOT = new File("/");
+    private static final File ROOT = new File("/");
     public static final File VILLAGER_ROOT = new File("villagers");
     public static final File VILLAGER_DIR = new File("villagers/villagers");
     public static final File VILLAGER_TEXTURES = new File("villagers/textures");

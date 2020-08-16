@@ -4,11 +4,15 @@ import com.google.gson.JsonObject;
 import mod.grimmauld.custom_villagers.util.FileHelper;
 import mod.grimmauld.custom_villagers.util.LazyPointOfInterestType;
 import mod.grimmauld.custom_villagers.util.LazyVillagerProfession;
+import mod.grimmauld.custom_villagers.util.TextureHelper;
 import net.minecraft.entity.merchant.villager.VillagerProfession;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.village.PointOfInterestType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -36,20 +40,24 @@ public class AllVillagers {
 
     @SubscribeEvent
     @SuppressWarnings("unused")
-    public static void onVillagerProffesionsRegistry(final RegistryEvent.Register<VillagerProfession> villagerProfessionRegistryEvent) {
+    public static void onVillagerProfessionsRegistry(final RegistryEvent.Register<VillagerProfession> villagerProfessionRegistryEvent) {
         villagerProfessions.forEach(lazyVillagerProfession -> villagerProfessionRegistryEvent.getRegistry().register(lazyVillagerProfession.getOrCreate()));
     }
 
-    static void load() {
+    static void loadVillagers() {
         FileHelper.findAllFiles(FileHelper.VILLAGER_DIR, ".json").forEach(file -> {
             JsonObject json = FileHelper.openAsJson(file);
             if (json == null)
                 return;
 
-            final ResourceLocation blockId = new ResourceLocation(JSONUtils.getString(json, "profession_block"));
-            final ResourceLocation id = new ResourceLocation(JSONUtils.getString(json, "id"));
-
-            addVillager(blockId, id, null);
+            addVillager(new ResourceLocation(JSONUtils.getString(json, "profession_block")), new ResourceLocation(JSONUtils.getString(json, "id")), null);
         });
+    }
+
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    @SuppressWarnings("unused")
+    public static void reloadEvent(ModelRegistryEvent event) {
+        TextureHelper.loadProfessionTextures();
     }
 }

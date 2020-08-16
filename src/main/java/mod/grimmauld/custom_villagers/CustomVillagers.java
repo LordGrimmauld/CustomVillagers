@@ -15,6 +15,6 @@ public class CustomVillagers {
     public CustomVillagers() {
         MinecraftForge.EVENT_BUS.register(AllVillagers.class);
         FileHelper.checkFileStructure();
-        AllVillagers.load();
+        AllVillagers.loadVillagers();
     }
 }
