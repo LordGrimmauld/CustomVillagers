@@ -19,7 +19,7 @@ public class TextureHelper {
     public static void loadProfessionTextures() {
         professionTextureLocations.forEach(resourceLocation -> MC.getTextureManager().deleteTexture(resourceLocation));
         professionTextureLocations.clear();
-        FileHelper.findAllFiles(FileHelper.VILLAGER_TEXTURES, ".png").forEach(file -> {
+        FileHelper.findAllFilesOfType(FileHelper.VILLAGER_TEXTURES, ".png").forEach(file -> {
             try {
                 ResourceLocation resourceLocation = new ResourceLocation(CustomVillagers.MODID, "textures/entity/villager/profession/" + file.getName());
                 professionTextureLocations.add(resourceLocation);

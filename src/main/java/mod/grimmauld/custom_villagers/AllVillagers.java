@@ -2,12 +2,14 @@ package mod.grimmauld.custom_villagers;
 
 import com.google.gson.JsonObject;
 import mod.grimmauld.custom_villagers.util.*;
+import net.minecraft.client.gui.screen.inventory.MerchantScreen;
 import net.minecraft.entity.merchant.villager.VillagerProfession;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.village.PointOfInterestType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
@@ -42,7 +44,7 @@ public class AllVillagers {
     }
 
     static void loadVillagers() {
-        FileHelper.findAllFiles(FileHelper.VILLAGER_DIR, ".json").forEach(file -> {
+        FileHelper.findAllFilesOfType(FileHelper.VILLAGER_DIR, ".json").forEach(file -> {
             JsonObject json = FileHelper.openAsJson(file);
             if (json == null)
                 return;
@@ -54,7 +56,7 @@ public class AllVillagers {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("unused")
-    public static void reloadEvent(ModelRegistryEvent event) {
+    public static void textureReloadEvent(ModelRegistryEvent event) {
         TextureHelper.loadProfessionTextures();
     }
 
@@ -62,6 +64,14 @@ public class AllVillagers {
     @SuppressWarnings("unused")
     @OnlyIn(Dist.CLIENT)
     public static void loadSoundsEvent(SoundLoadEvent event) {
-        SoundHelper.loadWorkSounds();;
+        SoundHelper.loadWorkSounds();
+    }
+
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    @SuppressWarnings("unused")
+    public static void setupEvent(GuiOpenEvent event) {
+        if (event.getGui() instanceof MerchantScreen)
+            LangHelper.loadLangFiles();
     }
 }

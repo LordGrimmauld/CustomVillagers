@@ -9,12 +9,12 @@ public class SoundHelper {
     private static final Minecraft MC = Minecraft.getInstance();
 
     public static void loadWorkSounds() {
-        FileHelper.findAllFiles(FileHelper.VILLAGER_SOUNDS, ".ogg").forEach(file -> {
+        FileHelper.findAllFilesOfType(FileHelper.VILLAGER_SOUNDS, ".ogg").forEach(file -> {
 
         });
 
         /*
-        FileHelper.findAllFiles(FileHelper.VILLAGER_TEXTURES, ".png").forEach(file -> {
+        FileHelper.findAllFilesOfType(FileHelper.VILLAGER_TEXTURES, ".png").forEach(file -> {
             try {
                 ResourceLocation resourceLocation = new ResourceLocation(CustomVillagers.MODID, "textures/entity/villager/profession/" + file.getName());
                 professionTextureLocations.add(resourceLocation);
